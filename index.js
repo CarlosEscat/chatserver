@@ -2,8 +2,8 @@ const express = require("express");
 const Sse = require("json-sse");
 const bodyParser = require("body-parser");
 
-const data = "Hello world from Carlos";
-const sse = new Sse(data);
+const messages = ["Hello world from Carlos"];
+const sse = new Sse(messages);
 
 const app = express();
 
@@ -13,6 +13,9 @@ app.get("/stream", sse.init);
 
 app.post("/message", (request, response) => {
   const { message } = request.body;
+  messages.push(message);
+
+  sse.updateInit(messages);
   sse.send(message);
   response.send(message);
 });
