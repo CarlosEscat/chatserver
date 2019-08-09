@@ -2,7 +2,7 @@ const express = require("express");
 const Sse = require("json-sse");
 const bodyParser = require("body-parser");
 
-const data = "hello";
+const data = "Hello world from Carlos";
 const sse = new Sse(data);
 
 const app = express();
