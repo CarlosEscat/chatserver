@@ -11,7 +11,8 @@ const db = new Sequelize(databaseUrl);
 db.sync({ force: false }).then(() => console.log("Database synced"));
 
 const Message = db.define("message", {
-  text: Sequelize.STRING
+  text: Sequelize.STRING,
+  user: Sequelize.STRING
 });
 
 //const messages = ["Hello world from Carlos"];
@@ -35,9 +36,9 @@ app.get("/stream", async (request, response) => {
 });
 
 app.post("/message", async (request, response) => {
-  const { message } = request.body;
+  const { message, user } = request.body;
   //messages.push(message);
-  const entity = await Message.create({ text: message });
+  const entity = await Message.create({ text: message, user });
 
   const messages = await Message.findAll();
 
