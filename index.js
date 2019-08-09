@@ -1,11 +1,16 @@
 const express = require("express");
 const Sse = require("json-sse");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const messages = ["Hello world from Carlos"];
-const sse = new Sse(messages);
+
+const data = JSON.stringify(messages);
+const sse = new Sse(data);
 
 const app = express();
+const middleware = cors();
+app.use(middleware);
 
 const jsonParser = bodyParser.json();
 app.use(jsonParser);
@@ -15,8 +20,10 @@ app.post("/message", (request, response) => {
   const { message } = request.body;
   messages.push(message);
 
-  sse.updateInit(messages);
-  sse.send(message);
+  const data = JSON.stringify(messages);
+
+  sse.updateInit(data);
+  sse.send(data);
   response.send(message);
 });
 
