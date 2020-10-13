@@ -3,6 +3,8 @@ const Sse = require("json-sse");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const Sequelize = require("sequelize");
+const axios = require("axios").default;
+const uuidv4 = require("uuid/v4");
 
 const databaseUrl =
   process.env.DATABASE_URL ||
@@ -17,16 +19,6 @@ const Message = db.define("message", {
   user: Sequelize.STRING,
 });
 
-// const Channel = db.define("channel", {
-//   name: Sequelize.STRING,
-// });
-
-// Message.belongsTo(Channel);
-// Channel.hasMany(Message);
-
-//const messages = ["Hello world from Carlos"];
-
-//const data = JSON.stringify(messages);
 const stream = new Sse();
 
 const app = express();
@@ -37,18 +29,47 @@ const jsonParser = bodyParser.json();
 app.use(jsonParser);
 
 app.get("/stream", async (request, response) => {
-  //const channels = await Channel.findAll({ include: [Message] });
   const messages = await Message.findAll();
   const data = JSON.stringify(messages);
   stream.updateInit(data);
   stream.init(request, response);
 });
 
+var subscriptionKey = "INSERT_KEY";
+var endpoint = "https://api.cognitive.microsofttranslator.com";
+
 app.post("/message", async (request, response) => {
-  //const { message, user, channelId } = request.body;
   const { message, user } = request.body;
 
-  const entity = await Message.create({ text: message, user });
+  const newmessage = await axios({
+    baseURL: endpoint,
+    url: "/translate",
+    method: "post",
+    headers: {
+      "Ocp-Apim-Subscription-Key": subscriptionKey,
+      "Content-type": "application/json",
+      "X-ClientTraceId": uuidv4().toString(),
+    },
+    params: {
+      "api-version": "3.0",
+      from: "es",
+      to: ["en"],
+    },
+    data: [
+      {
+        text: message,
+      },
+    ],
+    responseType: "json",
+  }).then(function (res) {
+    //console.log(JSON.stringify(response.data, null, 4));
+    const trad = res.data[0].translations[0].text;
+
+    return trad;
+  });
+  console.log(newmessage);
+
+  const entity = await Message.create({ text: newmessage, user });
 
   const messages = await Message.findAll();
 
