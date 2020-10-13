@@ -35,7 +35,7 @@ app.get("/stream", async (request, response) => {
   stream.init(request, response);
 });
 
-var subscriptionKey = "664f165f877f47c0bca5e0284e210922";
+var subscriptionKey = "INSERT_KEY_HERE";
 var endpoint = "https://api.cognitive.microsofttranslator.com";
 
 app.post("/message", async (request, response) => {
